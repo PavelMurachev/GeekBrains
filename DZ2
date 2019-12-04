@@ -1,0 +1,32 @@
+Практическое задание по теме “Управление БД”
+1. Установите СУБД MySQL. Создайте в домашней директории файл .my.cnf, задав в нем логин и пароль, который указывался при установке.
+
+sudo nano /root/.my.cnf
+-- далее бьем вручную
+[client]
+user=root
+password=*******
+
+2. Создайте базу данных example, разместите в ней таблицу users, состоящую из двух столбцов, числового id и строкового name.
+
+CREATE DATABASE IF NOT EXISTS example;
+USE example;
+CREATE TABLE IF EXISTS users(
+	id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	name VARCHAR(255)
+);
+
+3.Создайте дамп базы данных example из предыдущего задания, разверните содержимое дампа в новую базу данных sample.
+
+mysqldump example > example.sql
+mysql
+CREATE DATABASE IF NOT EXISTS sample;
+\q
+mysql sample < example.sql
+
+
+(по желанию) Ознакомьтесь более подробно с документацией утилиты mysqldump. Создайте дамп единственной таблицы help_keyword базы данных mysql. Причем добейтесь того, чтобы дамп содержал только первые 100 строк таблицы.
+
+mysqldump --where="true limit 100" mysql help_keyword > help_keyword.sql
+
+(не нашел как восстановить базу из дампа. ругается на название mysql)
