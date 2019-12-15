@@ -1,0 +1,53 @@
+8.3. Переписать запросы, заданые к ДЗ урока 6 с использованием JOIN (четыре запроса).
+
+6.2. Пусть задан некоторый пользователь. 
+Из всех друзей этого пользователя найдите человека, который больше всех общался с нашим пользователем.
+
+
+SELECT (SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE id = from_user_id) AS friend,
+  COUNT(*) AS total_messages 
+FROM users AS u
+JOIN friendship AS f
+ON f.friend_id = u.id
+JOIN messages AS m
+ON m.to_user_id = u.id OR m.from_user_id = u.id
+WHERE f.friend_id = 1 OR f.user_id = 1
+GROUP BY m.from_user_id
+    ORDER BY total_messages DESC
+    LIMIT 1;
+
+
+6.3. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+
+SELECT sum(sl) FROM (
+SELECT sum(l.target_id) AS sl
+FROM likes AS l
+JOIN profiles AS p
+ON p.user_id = l.user_id
+GROUP BY p.birthday
+LIMIT 10) AS sumlikes;
+
+6.4. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+
+SELECT sum(l.user_id)
+FROM likes AS l
+JOIN profiles AS p
+ON l.user_id = p.user_id
+GROUP BY p.sex
+LIMIT 1;
+
+6.5. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+
+SELECT CONCAT(first_name, ' ', last_name) AS user, COUNT(*) AS count
+FROM users AS u
+JOIN likes AS l
+ON l.user_id = u.id
+JOIN media AS md
+ON md.user_id = u.id
+JOIN messages AS ms
+ON ms.from_user_id = u.id
+GROUP BY u.id
+ORDER BY count
+LIMIT 10;
+
+
