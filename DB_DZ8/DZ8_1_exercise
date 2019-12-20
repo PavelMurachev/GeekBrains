@@ -1,0 +1,78 @@
+8.3. Переписать запросы, заданые к ДЗ урока 6 с использованием JOIN (четыре запроса).
+
+6.2. Пусть задан некоторый пользователь. 
+Из всех друзей этого пользователя найдите человека, который больше всех общался с нашим пользователем.
+(К сожалению есть логическая ошибка, поэтому подсчёт неверен.)
+ИСПРАВИЛ
+
+SELECT (SELECT CONCAT(first_name, ' ', last_name) 
+	FROM users 
+	  WHERE id = m.from_user_id) AS friend,
+  COUNT(*) AS total_messages 
+FROM users AS u
+  JOIN friendship AS f
+    ON u.id = f.friend_id
+      OR u.id = f.user_id
+JOIN messages AS m
+  ON m.to_user_id = u.id 
+    AND (m.to_user_id = f.friend_id
+	OR m.from_user_id = f.user_id)
+WHERE user_id = 2
+GROUP BY m.from_user_id
+    ORDER BY total_messages DESC
+    LIMIT 1;
+
+
+6.3. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+(Тоже нужно дорабатывать:
+SELECT sum(l.target_id) AS sl
+Тут нужно применить COUNT)
+
+ИСПРАВИЛ 
+
+-- По итогам разбора ставил DISTINCT сюда "SELECT COUNT(DISTINCT l.id) AS sl"
+-- выдача другая, лайков чуть меньше. Но по логике запроса не нашел где в моем варианте
+-- лайки дублируются. Буду благодарен за подсказку
+
+SELECT sum(sl) FROM (
+SELECT COUNT(l.id) AS sl
+FROM likes AS l
+JOIN profiles AS p
+ON p.user_id = l.target_id
+GROUP BY p.birthday
+LIMIT 10) AS sumlikes;
+
+6.4. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+(SELECT sum(l.user_id)
+Тоже нужно COUNT а не SUM.)
+
+ИСПРАВИЛ
+
+SELECT COUNT(l.user_id) 
+FROM likes AS l
+JOIN profiles AS p
+ON l.user_id = p.user_id
+GROUP BY p.sex
+LIMIT 1;
+
+6.5. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+(Хорошо, но в расчёт не попадут пользователи без активности по любому из показателей.)
+
+ИСПРАВИЛ
+
+SELECT CONCAT(first_name, ' ', last_name) AS user,
+  COUNT(DISTINCT ms.id) + 
+  COUNT(DISTINCT l.id) + 
+  COUNT(DISTINCT md.id) AS count
+ FROM users AS u
+  LEFT JOIN likes AS l
+    ON l.user_id = u.id
+  LEFT JOIN media AS md
+    ON md.user_id = u.id
+  LEFT JOIN messages AS ms
+    ON ms.from_user_id = u.id
+  GROUP BY u.id
+  ORDER BY count
+  LIMIT 10;
+
+
